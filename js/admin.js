@@ -1,3 +1,4 @@
+
 // 管理設定功能
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Admin JS loaded');
