@@ -39,7 +39,7 @@ function initTopicManagement() {
     const topicModal = document.getElementById('topic-modal');
     const topicForm = document.getElementById('topic-form');
     const closeModal = topicModal ? topicModal.querySelector('.close') : null;
-    const addQuestionButton = document.getElementById('add-question-btn'); // 注意這裡的ID改變
+    const addQuestionButton = document.getElementById('add-question-btn'); // 注意ID變更
     const surveyQuestions = document.getElementById('survey-questions');
     
     if (!addTopicButton || !topicModal || !topicForm) {
@@ -104,7 +104,6 @@ function initTopicManagement() {
     } else {
         console.error('Add question button not found');
     }
-    
     // 提交主題表單
     topicForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -258,7 +257,6 @@ function initTopicManagement() {
         loadTopics();
     });
 }
-
 // 新增問題函數 - 改進版
 function addQuestion(type) {
     console.log(`Adding question of type: ${type}`);
@@ -483,8 +481,7 @@ function addQuestion(type) {
         optionsGroup.appendChild(addOptionButton);
         questionItem.appendChild(optionsGroup);
     }
-    
-    // 分數設定
+ // 分數設定
     const scoreGroup = document.createElement('div');
     scoreGroup.className = 'form-group';
     
@@ -829,8 +826,7 @@ function editTopic(topic) {
                     input.className = 'option-text';
                     input.value = optionText;
                     input.required = true;
-                    
-                    const removeButton = document.createElement('button');
+                     const removeButton = document.createElement('button');
                     removeButton.type = 'button';
                     removeButton.className = 'remove-option';
                     removeButton.textContent = '刪除';
@@ -969,7 +965,6 @@ function deleteTopic(topicId) {
     // 重新載入主題列表
     loadTopics();
 }
-
 // 初始化群組管理
 function initGroupManagement() {
     console.log('Initializing group management');
@@ -1174,7 +1169,6 @@ function deleteGroup(groupName) {
     // 更新病床列表
     loadBeds();
 }
-
 // 載入主題多選項
 function loadTopicOptions(selectedTopics = []) {
     console.log('Loading topic options for group form');
