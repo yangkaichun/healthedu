@@ -50,6 +50,8 @@ function onVideoEnded() {
             viewingStatus: 'completed',
             surveyCompleted: false,
             surveyScore: null,
+            totalPossibleScore: selectedTopic ? selectedTopic.totalScore : 0,
+            percentageScore: null,
             nurseConfirmed: false,
             timestamp: new Date().toISOString()
         });
@@ -104,6 +106,8 @@ function loadVideo(topicId) {
                 viewingStatus: 'watching',
                 surveyCompleted: false,
                 surveyScore: null,
+                totalPossibleScore: selectedTopic.totalScore || 0,
+                percentageScore: null,
                 nurseConfirmed: false,
                 timestamp: new Date().toISOString()
             });
@@ -177,8 +181,39 @@ function syncToGitHub(dataType, data) {
     });
 }
 
+// 從 GitHub 同步資料
+async function syncFromGitHub() {
+    const dataTypes = ['topics', 'groups', 'beds', 'viewingRecords', 'notificationEmails'];
+    
+    for (const dataType of dataTypes) {
+        try {
+            // 獲取 Netlify 環境變數
+            const repoOwner = process.env.REPO_OWNER || '';
+            const repoName = process.env.REPO_NAME || '';
+            
+            if (!repoOwner || !repoName) {
+                console.log('未設定 GitHub 儲存庫資訊，跳過同步');
+                return;
+            }
+            
+            const response = await fetch(`https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/data/${dataType}.json`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem(dataType, JSON.stringify(data));
+                console.log(`成功從 GitHub 同步 ${dataType} 資料`);
+            }
+        } catch (error) {
+            console.error(`無法從 GitHub 同步 ${dataType} 資料:`, error);
+        }
+    }
+}
+
 // 當DOM載入完成時初始化
 document.addEventListener('DOMContentLoaded', function() {
+    // 嘗試從 GitHub 同步資料
+    syncFromGitHub();
+    
     // 在首頁初始化主題選項
     if (document.getElementById('topic-grid') && !window.location.pathname.includes('bed-selection.html')) {
         initTopics();
@@ -192,42 +227,102 @@ document.addEventListener('DOMContentLoaded', function() {
 function initTopics() {
     const topicGrid = document.getElementById('topic-grid');
     const submitTopicButton = document.getElementById('submit-topic');
+    const qrResult = document.getElementById('qr-result');
+    
+    if (!topicGrid) return;
+    
+    // 清空現有主題
+    topicGrid.innerHTML = '';
     
     // 從localStorage獲取主題資料
     let topicData = JSON.parse(localStorage.getItem('topics')) || [];
     
     // 如果沒有主題資料，則創建默認主題
     if (topicData.length === 0) {
-        topicData = Array.from({ length: 30 }, (_, i) => ({
+        topicData = Array.from({ length: 5 }, (_, i) => ({
             id: i + 1,
             name: `衛教主題 ${i + 1}`,
-            videoId: 'dQw4w9WgXcQ'  // 預設Youtube影片ID
+            videoId: 'dQw4w9WgXcQ',  // 預設Youtube影片ID
+            questions: [
+                {
+                    type: 'truefalse',
+                    text: '這是預設的是非題問題',
+                    correctAnswer: true,
+                    score: 10
+                },
+                {
+                    type: 'choice',
+                    text: '這是預設的選擇題問題',
+                    options: ['選項 A', '選項 B', '選項 C'],
+                    correctAnswerIndex: 0,
+                    score: 10
+                }
+            ],
+            totalScore: 20
         }));
         localStorage.setItem('topics', JSON.stringify(topicData));
     }
     
-    // 顯示主題選項
-    topicData.forEach(topic => {
-        const topicItem = document.createElement('div');
-        topicItem.className = 'topic-item';
-        topicItem.dataset.id = topic.id;
-        topicItem.textContent = topic.name;
+    // 檢查 QR 碼是否對應到病床號碼
+    const qrCode = qrResult.value.trim();
+    if (qrCode) {
+        const beds = JSON.parse(localStorage.getItem('beds')) || [];
+        const matchingBed = beds.find(bed => bed.bedNumber === qrCode);
         
-        topicItem.addEventListener('click', function() {
-            // 移除其他選項的選中狀態
-            document.querySelectorAll('.topic-item').forEach(item => {
-                item.classList.remove('selected');
+        if (matchingBed) {
+            // 找到對應的病床，只顯示該病床群組的主題
+            const groups = JSON.parse(localStorage.getItem('groups')) || [];
+            const bedGroup = groups.find(group => group.name === matchingBed.groupName);
+            
+            if (bedGroup && bedGroup.topics && bedGroup.topics.length > 0) {
+                // 過濾只顯示群組內的主題
+                const filteredTopics = topicData.filter(topic => bedGroup.topics.includes(topic.id));
+                displayTopics(filteredTopics);
+                return;
+            }
+        }
+    }
+    
+    // 如果沒有找到對應的病床或群組，顯示所有主題
+    displayTopics(topicData);
+    
+    // 內部函數：顯示主題列表
+    function displayTopics(topics) {
+        if (topics.length === 0) {
+            const noTopicsMsg = document.createElement('p');
+            noTopicsMsg.className = 'no-topics-message';
+            noTopicsMsg.textContent = '沒有可用的衛教主題';
+            topicGrid.appendChild(noTopicsMsg);
+            submitTopicButton.disabled = true;
+            return;
+        }
+        
+        // 按編號排序
+        topics.sort((a, b) => a.id - b.id);
+        
+        // 顯示主題選項
+        topics.forEach(topic => {
+            const topicItem = document.createElement('div');
+            topicItem.className = 'topic-item';
+            topicItem.dataset.id = topic.id;
+            topicItem.textContent = topic.name;
+            
+            topicItem.addEventListener('click', function() {
+                // 移除其他選項的選中狀態
+                document.querySelectorAll('.topic-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                
+                // 添加選中狀態
+                this.classList.add('selected');
+                
+                // 啟用提交按鈕
+                submitTopicButton.disabled = false;
             });
             
-            // 添加選中狀態
-            this.classList.add('selected');
-            
-            // 啟用提交按鈕
-            submitTopicButton.disabled = false;
+            topicGrid.appendChild(topicItem);
         });
-        
-        topicGrid.appendChild(topicItem);
-    });
+    }
     
     // 提交主題選擇
     submitTopicButton.addEventListener('click', function() {
@@ -251,61 +346,90 @@ function loadBedTopics(bedCode) {
     // 清空現有主題
     topicGrid.innerHTML = '';
     
-    // 從localStorage獲取病床群組資料
-    const groupData = JSON.parse(localStorage.getItem('bedGroups')) || [];
+    // 從localStorage獲取病床資料
+    const beds = JSON.parse(localStorage.getItem('beds')) || [];
+    const groups = JSON.parse(localStorage.getItem('groups')) || [];
     const topicData = JSON.parse(localStorage.getItem('topics')) || [];
     
     // 尋找床號對應的群組
-    const matchingGroups = groupData.filter(group => 
-        group.beds.some(bed => bed.toString() === bedCode.toString())
-    );
+    const matchingBed = beds.find(bed => bed.bedNumber === bedCode);
     
-    if (matchingGroups.length > 0) {
-        // 取得所有相關主題ID
-        const allowedTopicIds = new Set();
-        matchingGroups.forEach(group => {
-            group.topics.forEach(topicId => {
-                allowedTopicIds.add(topicId);
-            });
-        });
+    if (matchingBed) {
+        const bedGroup = groups.find(group => group.name === matchingBed.groupName);
         
-        // 過濾並顯示允許的主題
-        topicData.filter(topic => allowedTopicIds.has(topic.id)).forEach(topic => {
-            const topicItem = document.createElement('div');
-            topicItem.className = 'topic-item';
-            topicItem.dataset.id = topic.id;
-            topicItem.textContent = topic.name;
+        if (bedGroup && bedGroup.topics && bedGroup.topics.length > 0) {
+            // 過濾並顯示允許的主題
+            const filteredTopics = topicData.filter(topic => bedGroup.topics.includes(topic.id));
             
-            topicItem.addEventListener('click', function() {
-                // 移除其他選項的選中狀態
-                document.querySelectorAll('.topic-item').forEach(item => {
-                    item.classList.remove('selected');
+            if (filteredTopics.length === 0) {
+                const noTopicsMsg = document.createElement('p');
+                noTopicsMsg.className = 'no-topics-message';
+                noTopicsMsg.textContent = '此病床沒有可用的衛教主題';
+                topicGrid.appendChild(noTopicsMsg);
+                submitTopicButton.disabled = true;
+                return;
+            }
+            
+            // 按編號排序
+            filteredTopics.sort((a, b) => a.id - b.id);
+            
+            // 顯示主題選項
+            filteredTopics.forEach(topic => {
+                const topicItem = document.createElement('div');
+                topicItem.className = 'topic-item';
+                topicItem.dataset.id = topic.id;
+                topicItem.textContent = topic.name;
+                
+                topicItem.addEventListener('click', function() {
+                    // 移除其他選項的選中狀態
+                    document.querySelectorAll('.topic-item').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+                    
+                    // 添加選中狀態
+                    this.classList.add('selected');
+                    
+                    // 啟用提交按鈕
+                    submitTopicButton.disabled = false;
                 });
                 
-                // 添加選中狀態
-                this.classList.add('selected');
-                
-                // 啟用提交按鈕
-                submitTopicButton.disabled = false;
+                topicGrid.appendChild(topicItem);
             });
             
-            topicGrid.appendChild(topicItem);
-        });
-        
-        // 顯示主題選擇區域
-        document.getElementById('topic-section').style.display = 'block';
-        
-        // 提交主題選擇
-        submitTopicButton.addEventListener('click', function() {
-            const selectedTopic = document.querySelector('.topic-item.selected');
+            // 顯示主題選擇區域
+            document.getElementById('topic-section').style.display = 'block';
             
-            if (selectedTopic) {
-                const topicId = parseInt(selectedTopic.dataset.id);
-                document.getElementById('topic-section').style.display = 'none';
-                loadVideo(topicId);
-            }
-        });
+            // 提交主題選擇
+            submitTopicButton.addEventListener('click', function() {
+                const selectedTopic = document.querySelector('.topic-item.selected');
+                
+                if (selectedTopic) {
+                    const topicId = parseInt(selectedTopic.dataset.id);
+                    document.getElementById('topic-section').style.display = 'none';
+                    loadVideo(topicId);
+                }
+            });
+        } else {
+            // 無可用主題
+            const noTopicsMsg = document.createElement('p');
+            noTopicsMsg.className = 'no-topics-message';
+            noTopicsMsg.textContent = '此病床群組未設定衛教主題';
+            topicGrid.appendChild(noTopicsMsg);
+            submitTopicButton.disabled = true;
+        }
     } else {
-        alert(`找不到病床 ${bedCode} 對應的衛教主題，請確認病床號碼是否正確`);
+        alert(`找不到病床 ${bedCode} 的設定，請確認病床號碼是否正確`);
+    }
+}
+
+// 手動輸入病床號碼處理
+if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+    const qrResult = document.getElementById('qr-result');
+    
+    if (qrResult) {
+        qrResult.addEventListener('change', function() {
+            // 當使用者手動輸入 QR 碼後，重新初始化主題
+            initTopics();
+        });
     }
 }
