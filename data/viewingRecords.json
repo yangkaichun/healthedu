@@ -1,0 +1,15 @@
+[
+  {
+    "patientCode": "P12345",
+    "topicId": 1,
+    "topicName": "糖尿病飲食管理",
+    "viewingStatus": "completed",
+    "surveyCompleted": true,
+    "surveyScore": 15,
+    "totalPossibleScore": 20,
+    "percentageScore": 75,
+    "nurseConfirmed": false,
+    "timestamp": "2023-06-15T08:30:25.000Z",
+    "surveyTimestamp": "2023-06-15T08:45:12.000Z"
+  }
+]
