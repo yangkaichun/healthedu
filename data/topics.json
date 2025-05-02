@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "name": "糖尿病飲食管理",
+    "videoId": "abcd1234",
+    "questions": [
+      {
+        "type": "truefalse",
+        "text": "糖尿病患者不能吃任何含糖食物",
+        "correctAnswer": false,
+        "score": 10
+      },
+      {
+        "type": "choice",
+        "text": "下列哪種食物對糖尿病患者較為適合？",
+        "options": ["白飯", "全麥麵包", "蛋糕", "糖果"],
+        "correctAnswerIndex": 1,
+        "score": 10
+      }
+    ],
+    "totalScore": 20
+  }
+]
