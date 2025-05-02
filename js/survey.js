@@ -10,63 +10,98 @@ function loadSurvey(topicId) {
     // 清空現有問卷內容
     surveyForm.innerHTML = '';
     
-    // 創建默認問題 (實際應用中應從資料庫加載)
-    const questions = [
-        {
-            id: 1,
-            text: '您對此衛教影片的內容理解程度如何？',
-            options: ['非常理解', '大部分理解', '一般理解', '有些不理解', '完全不理解']
-        },
-        {
-            id: 2,
-            text: '這個衛教內容對您的幫助程度如何？',
-            options: ['非常有幫助', '有些幫助', '一般', '幫助不大', '完全沒幫助']
-        },
-        {
-            id: 3,
-            text: '您對影片中提到的健康建議執行的信心程度如何？',
-            options: ['非常有信心', '有些信心', '一般', '信心不足', '完全沒信心']
-        },
-        {
-            id: 4,
-            text: '您有哪些問題想進一步詢問護理師？',
-            isTextarea: true
-        }
-    ];
+    // 從 localStorage 獲取主題資料
+    const topics = JSON.parse(localStorage.getItem('topics')) || [];
+    const selectedTopic = topics.find(topic => topic.id === topicId);
+    
+    if (!selectedTopic || !selectedTopic.questions || selectedTopic.questions.length === 0) {
+        // 如果沒有找到主題或主題沒有問題，顯示錯誤訊息
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = '此主題尚未設定問卷';
+        surveyForm.appendChild(errorDiv);
+        return;
+    }
+    
+    // 添加問卷標題
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'survey-title';
+    titleDiv.innerHTML = `<h3>${selectedTopic.name} - 衛教評估問卷</h3>
+                         <p>總分: ${selectedTopic.totalScore}分</p>`;
+    surveyForm.appendChild(titleDiv);
     
     // 生成問卷內容
-    questions.forEach(question => {
+    selectedTopic.questions.forEach((question, index) => {
         const questionDiv = document.createElement('div');
         questionDiv.className = 'survey-question';
+        questionDiv.dataset.score = question.score;
         
-        const questionText = document.createElement('p');
-        questionText.textContent = question.text;
-        questionDiv.appendChild(questionText);
+        // 問題標題
+        const questionTitle = document.createElement('div');
+        questionTitle.className = 'question-title';
+        questionTitle.innerHTML = `<strong>問題 ${index + 1}</strong> (${question.score}分): ${question.text}`;
+        questionDiv.appendChild(questionTitle);
         
-        if (question.isTextarea) {
-            // 文字輸入問題
-            const textarea = document.createElement('textarea');
-            textarea.name = `question_${question.id}`;
-            textarea.rows = 4;
-            textarea.style.width = '100%';
-            questionDiv.appendChild(textarea);
-        } else {
+        if (question.type === 'truefalse') {
+            // 是非題
+            const radioGroup = document.createElement('div');
+            radioGroup.className = 'radio-group';
+            
+            const trueOption = document.createElement('div');
+            trueOption.className = 'radio-option';
+            
+            const trueRadio = document.createElement('input');
+            trueRadio.type = 'radio';
+            trueRadio.name = `question_${index}`;
+            trueRadio.id = `question_${index}_true`;
+            trueRadio.value = 'true';
+            trueRadio.required = true;
+            
+            const trueLabel = document.createElement('label');
+            trueLabel.htmlFor = `question_${index}_true`;
+            trueLabel.textContent = '是';
+            
+            trueOption.appendChild(trueRadio);
+            trueOption.appendChild(trueLabel);
+            radioGroup.appendChild(trueOption);
+            
+            const falseOption = document.createElement('div');
+            falseOption.className = 'radio-option';
+            
+            const falseRadio = document.createElement('input');
+            falseRadio.type = 'radio';
+            falseRadio.name = `question_${index}`;
+            falseRadio.id = `question_${index}_false`;
+            falseRadio.value = 'false';
+            falseRadio.required = true;
+            
+            const falseLabel = document.createElement('label');
+            falseLabel.htmlFor = `question_${index}_false`;
+            falseLabel.textContent = '否';
+            
+            falseOption.appendChild(falseRadio);
+            falseOption.appendChild(falseLabel);
+            radioGroup.appendChild(falseOption);
+            
+            questionDiv.appendChild(radioGroup);
+        } else if (question.type === 'choice') {
             // 選擇題
             const radioGroup = document.createElement('div');
             radioGroup.className = 'radio-group';
             
-            question.options.forEach((option, index) => {
+            question.options.forEach((option, optionIndex) => {
                 const radioOption = document.createElement('div');
                 radioOption.className = 'radio-option';
                 
                 const radio = document.createElement('input');
                 radio.type = 'radio';
-                radio.name = `question_${question.id}`;
-                radio.id = `question_${question.id}_option_${index}`;
-                radio.value = index + 1;
+                radio.name = `question_${index}`;
+                radio.id = `question_${index}_option_${optionIndex}`;
+                radio.value = optionIndex.toString();
+                radio.required = true;
                 
                 const label = document.createElement('label');
-                label.htmlFor = `question_${question.id}_option_${index}`;
+                label.htmlFor = `question_${index}_option_${optionIndex}`;
                 label.textContent = option;
                 
                 radioOption.appendChild(radio);
@@ -96,34 +131,41 @@ function loadSurvey(topicId) {
     surveyForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // 檢查必答問題是否已回答
-        const requiredQuestions = [1, 2, 3]; // 假設前三題為必答
-        let allAnswered = true;
+        // 檢查所有問題是否已回答
+        const unansweredQuestions = document.querySelectorAll('.survey-question').length - 
+                                   document.querySelectorAll('.survey-question input:checked').length;
         
-        for (const qId of requiredQuestions) {
-            const answered = document.querySelector(`input[name="question_${qId}"]:checked`);
-            if (!answered) {
-                allAnswered = false;
-                break;
-            }
-        }
-        
-        if (!allAnswered) {
-            alert('請回答所有必答問題');
+        if (unansweredQuestions > 0) {
+            alert('請回答所有問題');
             return;
         }
         
-        // 計算問卷分數 (假設計分方式為選項值的總和)
-        let score = 0;
-        for (const qId of requiredQuestions) {
-            const selectedOption = document.querySelector(`input[name="question_${qId}"]:checked`);
-            score += parseInt(selectedOption.value);
-        }
+        // 計算得分
+        let userScore = 0;
+        let totalScore = 0;
+        
+        selectedTopic.questions.forEach((question, index) => {
+            const score = parseInt(question.score);
+            totalScore += score;
+            
+            if (question.type === 'truefalse') {
+                const selectedAnswer = document.querySelector(`input[name="question_${index}"]:checked`).value === 'true';
+                if (selectedAnswer === question.correctAnswer) {
+                    userScore += score;
+                }
+            } else if (question.type === 'choice') {
+                const selectedIndex = parseInt(document.querySelector(`input[name="question_${index}"]:checked`).value);
+                if (selectedIndex === question.correctAnswerIndex) {
+                    userScore += score;
+                }
+            }
+        });
+        
+        // 計算百分比得分
+        const percentageScore = Math.round((userScore / totalScore) * 100);
         
         // 取得病人代碼和主題
         const patientCode = document.getElementById('qr-result').value;
-        const topicData = JSON.parse(localStorage.getItem('topics')) || [];
-        const selectedTopic = topicData.find(topic => topic.id === topicId);
         
         // 儲存問卷結果
         const viewingRecords = JSON.parse(localStorage.getItem('viewingRecords')) || [];
@@ -135,12 +177,10 @@ function loadSurvey(topicId) {
         
         if (existingRecordIndex !== -1) {
             viewingRecords[existingRecordIndex].surveyCompleted = true;
-            viewingRecords[existingRecordIndex].surveyScore = score;
+            viewingRecords[existingRecordIndex].surveyScore = userScore;
+            viewingRecords[existingRecordIndex].totalPossibleScore = totalScore;
+            viewingRecords[existingRecordIndex].percentageScore = percentageScore;
             viewingRecords[existingRecordIndex].surveyTimestamp = new Date().toISOString();
-            
-            // 收集文字問題的回答
-            const feedback = document.querySelector('textarea[name="question_4"]').value;
-            viewingRecords[existingRecordIndex].feedback = feedback;
         }
         
         localStorage.setItem('viewingRecords', JSON.stringify(viewingRecords));
