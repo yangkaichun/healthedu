@@ -1,1 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>衛教問卷結果</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>衛教問卷結果</h1>
+        
+        <div class="controls">
+            <button id="settings-button">設定通知Email</button>
+        </div>
+        
+        <div class="results-table-container">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>病人代碼</th>
+                        <th>衛教主題</th>
+                        <th>觀看狀態</th>
+                        <th>問卷分數</th>
+                        <th>護理師確認</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body">
+                    <!-- 結果會由JS動態生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="email-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>設定通知Email清單</h2>
+                <div id="email-list">
+                    <!-- Email清單會由JS動態生成 -->
+                </div>
+                <div class="input-group">
+                    <input type="email" id="new-email" placeholder="新增Email">
+                    <button id="add-email">新增</button>
+                </div>
+                <button id="save-emails">儲存設定</button>
+            </div>
+        </div>
+    </div>
 
+    <script src="js/results.js"></script>
+</body>
+</html>
