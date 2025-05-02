@@ -13,6 +13,7 @@
         <ul class="tabs">
             <li><a href="#topics" class="active">衛教主題設定</a></li>
             <li><a href="#groups">群組設定</a></li>
+            <li><a href="#beds">病床設定</a></li>
         </ul>
         
         <div id="topics" class="tab-content active">
@@ -26,6 +27,7 @@
                             <th>編號</th>
                             <th>主題名稱</th>
                             <th>YouTube影片ID</th>
+                            <th>問卷題數</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -45,7 +47,6 @@
                     <thead>
                         <tr>
                             <th>群組名稱</th>
-                            <th>病床號碼</th>
                             <th>包含主題</th>
                             <th>操作</th>
                         </tr>
@@ -57,6 +58,27 @@
             </div>
         </div>
         
+        <div id="beds" class="tab-content">
+            <h2>病床設定</h2>
+            <button id="add-bed">新增病床</button>
+            
+            <div class="beds-table-container">
+                <table class="beds-table">
+                    <thead>
+                        <tr>
+                            <th>病床號碼</th>
+                            <th>所屬群組</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="beds-body">
+                        <!-- 病床列表會由JS動態生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 主題編輯模態框 -->
         <div id="topic-modal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
@@ -75,11 +97,22 @@
                         <input type="text" id="topic-video" required>
                         <small>例如：https://www.youtube.com/watch?v=<b>abcd1234</b>，填入粗體部分</small>
                     </div>
-                    <button type="submit">儲存</button>
+                    
+                    <h3>問卷設定</h3>
+                    <div id="survey-questions">
+                        <!-- 問卷題目將由JS動態生成 -->
+                    </div>
+                    
+                    <button type="button" id="add-question">新增問題</button>
+                    
+                    <div class="button-group">
+                        <button type="submit">儲存</button>
+                    </div>
                 </form>
             </div>
         </div>
         
+        <!-- 群組編輯模態框 -->
         <div id="group-modal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
@@ -88,10 +121,6 @@
                     <div class="form-group">
                         <label for="group-name">群組名稱：</label>
                         <input type="text" id="group-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="group-beds">病床號碼 (多個請用逗號分隔)：</label>
-                        <input type="text" id="group-beds" required>
                     </div>
                     <div class="form-group">
                         <label>包含主題：</label>
@@ -103,6 +132,84 @@
                 </form>
             </div>
         </div>
+        
+        <!-- 病床編輯模態框 -->
+        <div id="bed-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>編輯病床</h2>
+                <form id="bed-form">
+                    <div class="form-group">
+                        <label for="bed-number">病床號碼：</label>
+                        <input type="text" id="bed-number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bed-group">所屬群組：</label>
+                        <select id="bed-group" required>
+                            <!-- 群組選項會由JS動態生成 -->
+                        </select>
+                    </div>
+                    <button type="submit">儲存</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 問題類型模板 -->
+        <template id="question-template-truefalse">
+            <div class="question-item" data-type="truefalse">
+                <div class="question-header">
+                    <h4>是非題</h4>
+                    <button type="button" class="remove-question">刪除</button>
+                </div>
+                <div class="form-group">
+                    <label for="question-text">問題文字：</label>
+                    <input type="text" class="question-text" required>
+                </div>
+                <div class="form-group">
+                    <label>正確答案：</label>
+                    <div class="radio-inline">
+                        <label>
+                            <input type="radio" name="correct-answer" value="true" checked> 是
+                        </label>
+                        <label>
+                            <input type="radio" name="correct-answer" value="false"> 否
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="question-score">題目分數：</label>
+                    <input type="number" class="question-score" min="1" value="10" required>
+                </div>
+            </div>
+        </template>
+        
+        <template id="question-template-choice">
+            <div class="question-item" data-type="choice">
+                <div class="question-header">
+                    <h4>選擇題</h4>
+                    <button type="button" class="remove-question">刪除</button>
+                </div>
+                <div class="form-group">
+                    <label for="question-text">問題文字：</label>
+                    <input type="text" class="question-text" required>
+                </div>
+                <div class="form-group">
+                    <label>選項：</label>
+                    <div class="option-list">
+                        <div class="option-item">
+                            <input type="radio" name="correct-answer" value="0" checked>
+                            <input type="text" class="option-text" placeholder="選項文字" required>
+                            <button type="button" class="remove-option">刪除</button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-option">新增選項</button>
+                </div>
+                <div class="form-group">
+                    <label for="question-score">題目分數：</label>
+                    <input type="number" class="question-score" min="1" value="10" required>
+                </div>
+            </div>
+        </template>
     </div>
 
     <script src="js/admin.js"></script>
