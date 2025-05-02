@@ -1,1 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>衛教系統管理</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>衛教系統管理</h1>
+        
+        <ul class="tabs">
+            <li><a href="#topics" class="active">衛教主題設定</a></li>
+            <li><a href="#groups">群組設定</a></li>
+        </ul>
+        
+        <div id="topics" class="tab-content active">
+            <h2>衛教主題設定</h2>
+            <button id="add-topic">新增主題</button>
+            
+            <div class="topics-table-container">
+                <table class="topics-table">
+                    <thead>
+                        <tr>
+                            <th>編號</th>
+                            <th>主題名稱</th>
+                            <th>YouTube影片ID</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topics-body">
+                        <!-- 主題列表會由JS動態生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="groups" class="tab-content">
+            <h2>病床群組設定</h2>
+            <button id="add-group">新增群組</button>
+            
+            <div class="groups-table-container">
+                <table class="groups-table">
+                    <thead>
+                        <tr>
+                            <th>群組名稱</th>
+                            <th>病床號碼</th>
+                            <th>包含主題</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="groups-body">
+                        <!-- 群組列表會由JS動態生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="topic-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>編輯衛教主題</h2>
+                <form id="topic-form">
+                    <div class="form-group">
+                        <label for="topic-id">主題編號：</label>
+                        <input type="number" id="topic-id" min="1" max="30" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="topic-name">主題名稱：</label>
+                        <input type="text" id="topic-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="topic-video">YouTube影片ID：</label>
+                        <input type="text" id="topic-video" required>
+                        <small>例如：https://www.youtube.com/watch?v=<b>abcd1234</b>，填入粗體部分</small>
+                    </div>
+                    <button type="submit">儲存</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="group-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>編輯病床群組</h2>
+                <form id="group-form">
+                    <div class="form-group">
+                        <label for="group-name">群組名稱：</label>
+                        <input type="text" id="group-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="group-beds">病床號碼 (多個請用逗號分隔)：</label>
+                        <input type="text" id="group-beds" required>
+                    </div>
+                    <div class="form-group">
+                        <label>包含主題：</label>
+                        <div id="group-topics" class="checkbox-group">
+                            <!-- 主題多選項會由JS動態生成 -->
+                        </div>
+                    </div>
+                    <button type="submit">儲存</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
+    <script src="js/admin.js"></script>
+</body>
+</html>
