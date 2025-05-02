@@ -340,3 +340,96 @@ tbody tr:hover {
         margin: 10% auto;
     }
 }
+/* 添加到 style.css 中 */
+
+/* 問題編輯樣式 */
+.question-item {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.question-header h4 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.option-list {
+    margin-bottom: 10px;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.option-text {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.radio-inline {
+    display: flex;
+    gap: 20px;
+}
+
+.remove-question,
+.remove-option {
+    padding: 5px 10px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-option {
+    padding: 5px 10px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+/* 問卷顯示樣式 */
+.survey-title {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.survey-title h3 {
+    margin-bottom: 5px;
+}
+
+.question-title {
+    margin-bottom: 10px;
+}
+
+.error-message {
+    color: #e74c3c;
+    padding: 15px;
+    text-align: center;
+    font-size: 18px;
+}
+
+.no-topics-message {
+    text-align: center;
+    padding: 20px;
+    color: #7f8c8d;
+    font-style: italic;
+}
