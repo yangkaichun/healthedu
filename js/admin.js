@@ -39,7 +39,7 @@ function initTopicManagement() {
     const topicModal = document.getElementById('topic-modal');
     const topicForm = document.getElementById('topic-form');
     const closeModal = topicModal ? topicModal.querySelector('.close') : null;
-    const addQuestionButton = document.getElementById('add-question');
+    const addQuestionButton = document.getElementById('add-question-btn'); // 注意這裡的ID改變
     const surveyQuestions = document.getElementById('survey-questions');
     
     if (!addTopicButton || !topicModal || !topicForm) {
@@ -86,35 +86,23 @@ function initTopicManagement() {
         }
     });
     
-    // 新增問題按鈕
+    // 新增問題按鈕 - 這裡是修正的關鍵部分
     if (addQuestionButton) {
-        addQuestionButton.addEventListener('click', function() {
+        console.log('Found add question button');
+        
+        // 直接使用 onclick 而不是 addEventListener
+        addQuestionButton.onclick = function() {
             console.log('Add question button clicked');
+            const questionType = prompt('請選擇問題類型 (輸入數字)：\n1. 是非題\n2. 選擇題');
             
-            // 顯示問題類型選擇對話框
-            const questionTypeDialog = document.createElement('div');
-            questionTypeDialog.className = 'question-type-dialog';
-            questionTypeDialog.innerHTML = `
-                <div class="question-type-dialog-content">
-                    <h4>選擇問題類型</h4>
-                    <button type="button" data-type="truefalse">是非題</button>
-                    <button type="button" data-type="choice">選擇題</button>
-                    <button type="button" class="cancel-button">取消</button>
-                </div>
-            `;
-            
-            document.body.appendChild(questionTypeDialog);
-            
-            // 處理問題類型選擇
-            questionTypeDialog.addEventListener('click', function(e) {
-                if (e.target.dataset.type) {
-                    addQuestion(e.target.dataset.type);
-                    document.body.removeChild(questionTypeDialog);
-                } else if (e.target.classList.contains('cancel-button')) {
-                    document.body.removeChild(questionTypeDialog);
-                }
-            });
-        });
+            if (questionType === '1') {
+                addQuestion('truefalse');
+            } else if (questionType === '2') {
+                addQuestion('choice');
+            }
+        };
+    } else {
+        console.error('Add question button not found');
     }
     
     // 提交主題表單
@@ -825,7 +813,7 @@ function editTopic(topic) {
                 // 生成唯一的 radio 組名
                 const radioName = `option-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
                 
-              // 創建現有選項
+                // 創建現有選項
                 question.options.forEach((optionText, index) => {
                     const optionItem = document.createElement('div');
                     optionItem.className = 'option-item';
@@ -1472,4 +1460,3 @@ function syncToGitHub(dataType, data) {
     }).catch(error => {
         console.error('同步資料到 GitHub 失敗:', error);
     });
-}
