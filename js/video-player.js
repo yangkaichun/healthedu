@@ -10,20 +10,13 @@ let videoCompleted = false;
 
 // 阻止影片快轉
 function preventSeek() {
-    let previousTime = 0;
-    
-    videoElement.addEventListener('timeupdate', function() {
-        if (videoElement.currentTime - previousTime > 1) {
-            // 使用者嘗試跳轉，將時間重置回上一個有效位置
-            videoElement.currentTime = previousTime;
-        } else {
-            previousTime = videoElement.currentTime;
-        }
-    });
+    // 注意：在使用嵌入的YouTube播放器時，這個功能可能無法直接使用
+    // 控制權交給YouTube API的事件監聽
 }
 
 // 當影片播放完畢
 function onVideoEnded() {
+    console.log('Video ended');
     videoCompleted = true;
     surveyButtonContainer.style.display = 'block';
     
@@ -65,6 +58,7 @@ function onVideoEnded() {
 
 // 載入影片
 function loadVideo(topicId) {
+    console.log(`Loading video for topic ID: ${topicId}`);
     selectedTopicId = topicId;
     videoCompleted = false;
     
@@ -74,18 +68,22 @@ function loadVideo(topicId) {
     
     if (selectedTopic) {
         videoTitle.textContent = selectedTopic.name;
-        // 使用 YouTube Embed API
-        videoElement.innerHTML = `
-            <iframe 
-                id="youtube-player" 
-                width="100%" 
-                height="500" 
-                src="https://www.youtube.com/embed/${selectedTopic.videoId}?enablejsapi=1&controls=0&disablekb=1&rel=0" 
-                frameborder="0" 
-                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
-                allowfullscreen>
-            </iframe>
-        `;
+        
+        // 清空舊的影片內容
+        videoElement.innerHTML = '';
+        
+        // 創建新的iframe元素
+        const iframe = document.createElement('iframe');
+        iframe.width = "100%";
+        iframe.height = "500";
+        iframe.src = `https://www.youtube.com/embed/${selectedTopic.videoId}?enablejsapi=1&rel=0&controls=1`;
+        iframe.frameBorder = "0";
+        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        iframe.allowFullscreen = true;
+        iframe.id = "youtube-player";
+        
+        // 將iframe添加到影片容器
+        videoElement.appendChild(iframe);
         
         // 記錄觀看開始
         const patientCode = document.getElementById('qr-result').value;
@@ -118,34 +116,52 @@ function loadVideo(topicId) {
         // 嘗試將資料同步到 GitHub
         syncToGitHub('viewingRecords', viewingRecords);
         
-        // YouTube API 載入完成後初始化
-        window.onYouTubeIframeAPIReady = function() {
-            new YT.Player('youtube-player', {
-                events: {
-                    'onStateChange': function(event) {
-                        // 當影片結束時 (state = 0)
-                        if (event.data === 0) {
-                            onVideoEnded();
-                        }
-                    }
-                }
-            });
-        };
-        
-        // 動態載入 YouTube API
-        if (!document.getElementById('youtube-api')) {
-            const tag = document.createElement('script');
-            tag.id = 'youtube-api';
-            tag.src = "https://www.youtube.com/iframe_api";
-            const firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        }
+        // 載入YouTube API
+        loadYouTubeAPI();
         
         // 顯示影片區段
         videoSection.style.display = 'block';
         surveyButtonContainer.style.display = 'none';
     } else {
         alert('無法載入影片，請重新選擇主題');
+    }
+}
+
+// 載入YouTube API
+function loadYouTubeAPI() {
+    // 檢查API是否已載入
+    if (window.YT && window.YT.Player) {
+        initYouTubePlayer();
+        return;
+    }
+    
+    // 動態載入YouTube API
+    if (!document.getElementById('youtube-api')) {
+        window.onYouTubeIframeAPIReady = function() {
+            initYouTubePlayer();
+        };
+        
+        const tag = document.createElement('script');
+        tag.id = 'youtube-api';
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+}
+
+// 初始化YouTube播放器
+function initYouTubePlayer() {
+    if (document.getElementById('youtube-player')) {
+        new YT.Player('youtube-player', {
+            events: {
+                'onStateChange': function(event) {
+                    // 當影片結束時 (state = 0)
+                    if (event.data === 0) {
+                        onVideoEnded();
+                    }
+                }
+            }
+        });
     }
 }
 
@@ -211,6 +227,8 @@ async function syncFromGitHub() {
 
 // 當DOM載入完成時初始化
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Video Player JS loaded');
+    
     // 嘗試從 GitHub 同步資料
     syncFromGitHub();
     
@@ -220,7 +238,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     initVideoControls();
-    preventSeek();
 });
 
 // 初始化主題選項
@@ -325,15 +342,17 @@ function initTopics() {
     }
     
     // 提交主題選擇
-    submitTopicButton.addEventListener('click', function() {
-        const selectedTopic = document.querySelector('.topic-item.selected');
-        
-        if (selectedTopic) {
-            const topicId = parseInt(selectedTopic.dataset.id);
-            document.getElementById('topic-section').style.display = 'none';
-            loadVideo(topicId);
-        }
-    });
+    if (submitTopicButton) {
+        submitTopicButton.addEventListener('click', function() {
+            const selectedTopic = document.querySelector('.topic-item.selected');
+            
+            if (selectedTopic) {
+                const topicId = parseInt(selectedTopic.dataset.id);
+                document.getElementById('topic-section').style.display = 'none';
+                loadVideo(topicId);
+            }
+        });
+    }
 }
 
 // 病床選擇頁面特有的主題載入功能
