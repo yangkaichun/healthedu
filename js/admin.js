@@ -1460,3 +1460,4 @@ function syncToGitHub(dataType, data) {
     }).catch(error => {
         console.error('同步資料到 GitHub 失敗:', error);
     });
+}
