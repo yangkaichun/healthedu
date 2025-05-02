@@ -1,1 +1,33 @@
+name: Store Data in GitHub
 
+on:
+  repository_dispatch:
+    types: [store-data]
+
+jobs:
+  store-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          
+      - name: Store data
+        run: |
+          # 建立資料目錄
+          mkdir -p data
+          
+          # 儲存接收到的資料
+          echo '${{ github.event.client_payload.data }}' > data/${{ github.event.client_payload.type }}.json
+        
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/
+          git commit -m "Update ${{ github.event.client_payload.type }} data" || echo "No changes to commit"
+          git push
