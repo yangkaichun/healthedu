@@ -1,1 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>衛教影片系統</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>衛教影片系統</h1>
+        
+        <div class="qr-section">
+            <div class="input-group">
+                <input type="text" id="qr-result" placeholder="掃描QR碼或輸入病人代碼" readonly>
+                <button id="scan-button">掃描</button>
+            </div>
+            <div id="qr-reader" style="display: none;"></div>
+        </div>
+        
+        <div class="topic-section" id="topic-section">
+            <h2>請選擇衛教主題</h2>
+            <div class="topic-grid" id="topic-grid">
+                <!-- 衛教主題會由JS動態生成 -->
+            </div>
+            
+            <button id="submit-topic" disabled>確認選擇</button>
+        </div>
+        
+        <div class="video-section" id="video-section" style="display: none;">
+            <h2 id="video-title">衛教影片</h2>
+            <div class="video-container">
+                <video id="education-video" controls>
+                    您的瀏覽器不支援HTML5影片播放。
+                </video>
+            </div>
+            <div id="survey-button-container" style="display: none;">
+                <button id="show-survey">填寫問卷</button>
+            </div>
+        </div>
+        
+        <div class="survey-section" id="survey-section" style="display: none;">
+            <h2>衛教問卷</h2>
+            <form id="survey-form">
+                <!-- 問卷內容會由JS動態生成 -->
+                <div class="button-group">
+                    <button type="submit" id="submit-survey">送出問卷</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="completion-section" id="completion-section" style="display: none;">
+            <h2>問卷已送出</h2>
+            <p>感謝您的填寫，已將問卷結果送出，護理師將盡快與您說明。</p>
+            <button id="return-home">返回首頁</button>
+        </div>
+    </div>
 
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="js/qrcode.js"></script>
+    <script src="js/video-player.js"></script>
+    <script src="js/survey.js"></script>
+</body>
+</html>
