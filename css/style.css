@@ -434,4 +434,201 @@ tbody tr:hover {
     font-style: italic;
 }
 /* 問題類型選擇對話框 */
-.question-type-dialog
+.question-type-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1100; /* 確保顯示在模態框之上 */
+}
+
+.question-type-dialog-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    width: 300px;
+    text-align: center;
+}
+
+.question-type-dialog button {
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.question-type-dialog button[data-type="truefalse"] {
+    background-color: #3498db;
+    color: white;
+}
+
+.question-type-dialog button[data-type="choice"] {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.question-type-dialog button.cancel-button {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.question-type-dialog button:hover {
+    opacity: 0.8;
+}
+
+/* 問題項目樣式 */
+.question-item {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.question-header h4 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.option-list {
+    margin-bottom: 15px;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+.option-text {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.radio-inline {
+    display: flex;
+    gap: 30px;
+    margin: 10px 0;
+}
+
+.radio-inline label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.remove-question,
+.remove-option {
+    padding: 5px 10px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.add-option {
+    padding: 5px 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.remove-question:hover,
+.remove-option:hover,
+.add-option:hover {
+    opacity: 0.85;
+}
+
+/* 沒有問題的提示訊息 */
+.no-questions-message {
+    text-align: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    color: #6c757d;
+    font-style: italic;
+    margin: 20px 0;
+}
+
+/* 表單分組樣式改進 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 15px;
+}
+
+.form-group input[type="number"] {
+    width: 100px;
+}
+
+/* 讓模態框更漂亮 */
+.modal-content {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.button-group {
+    text-align: center;
+    margin-top: 25px;
+}
+
+.button-group button {
+    padding: 10px 30px;
+    font-size: 16px;
+    font-weight: bold;
+}
