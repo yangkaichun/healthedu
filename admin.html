@@ -103,7 +103,7 @@
                         <!-- 問卷題目將由JS動態生成 -->
                     </div>
                     
-                    <button type="button" id="add-question">新增問題</button>
+                    <button type="button" id="add-question-btn">新增問題</button>
                     
                     <div class="button-group">
                         <button type="submit">儲存</button>
@@ -153,63 +153,6 @@
                 </form>
             </div>
         </div>
-        
-        <!-- 問題類型模板 -->
-        <template id="question-template-truefalse">
-            <div class="question-item" data-type="truefalse">
-                <div class="question-header">
-                    <h4>是非題</h4>
-                    <button type="button" class="remove-question">刪除</button>
-                </div>
-                <div class="form-group">
-                    <label for="question-text">問題文字：</label>
-                    <input type="text" class="question-text" required>
-                </div>
-                <div class="form-group">
-                    <label>正確答案：</label>
-                    <div class="radio-inline">
-                        <label>
-                            <input type="radio" name="correct-answer" value="true" checked> 是
-                        </label>
-                        <label>
-                            <input type="radio" name="correct-answer" value="false"> 否
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="question-score">題目分數：</label>
-                    <input type="number" class="question-score" min="1" value="10" required>
-                </div>
-            </div>
-        </template>
-        
-        <template id="question-template-choice">
-            <div class="question-item" data-type="choice">
-                <div class="question-header">
-                    <h4>選擇題</h4>
-                    <button type="button" class="remove-question">刪除</button>
-                </div>
-                <div class="form-group">
-                    <label for="question-text">問題文字：</label>
-                    <input type="text" class="question-text" required>
-                </div>
-                <div class="form-group">
-                    <label>選項：</label>
-                    <div class="option-list">
-                        <div class="option-item">
-                            <input type="radio" name="correct-answer" value="0" checked>
-                            <input type="text" class="option-text" placeholder="選項文字" required>
-                            <button type="button" class="remove-option">刪除</button>
-                        </div>
-                    </div>
-                    <button type="button" class="add-option">新增選項</button>
-                </div>
-                <div class="form-group">
-                    <label for="question-score">題目分數：</label>
-                    <input type="number" class="question-score" min="1" value="10" required>
-                </div>
-            </div>
-        </template>
     </div>
 
     <script src="js/admin.js"></script>
